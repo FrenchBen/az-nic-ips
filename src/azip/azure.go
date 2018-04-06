@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
-	"github.com/Azure/azure-sdk-for-go/arm/examples/helpers"
-	"github.com/Azure/azure-sdk-for-go/arm/network"
-	"github.com/Azure/go-autorest/autorest/azure"
+	"github.com/Azure-Samples/azure-sdk-for-go-samples/helpers"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2017-03-30/compute"
+	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2017-09-01/network"
+	"github.com/Azure/go-autorest/autorest/azure/auth"
 )
 
 const (
@@ -48,7 +48,12 @@ func initClients(env map[string]string) (network.InterfacesClient, compute.Virtu
 		rmEndpoint = uri
 	}
 
-	spt, err := helpers.NewServicePrincipalTokenFromCredentials(env, rmEndpoint)
+	config := auth.NewClientCredentialsConfig(clientID, clientSecret, tenantID)
+	config.AADEndpoint = azure.PublicCloud.ActiveDirectoryEndpoint
+	config.Resource = azure.PublicCloud.ResourceManagerEndpoint
+	spt, err := config.Authorizer()
+
+	// spt, err := helpers.NewServicePrincipalTokenFromCredentials(env, rmEndpoint)
 	if err != nil {
 		fmt.Printf("ERROR: Getting SP token - check that all ENV variables are set")
 		os.Exit(1)
